@@ -1,4 +1,4 @@
-1. Download my `setup_zsh.sh and .zsh_history` files:
+1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
     ```sh
     wget https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history
     ```
