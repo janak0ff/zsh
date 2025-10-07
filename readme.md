@@ -1,3 +1,7 @@
+[Automate Your Zsh Setup- Scripted Installation of Oh My Zsh, Auto-Suggestions & Syntax Highlighting](https://blogs.janakkumarshrestha0.com.np/posts/linux/zsh-setup-with-auto-suggestions--themes/)
+
+---
+
 1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
     ```sh
     wget https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history
@@ -24,10 +28,6 @@
 
 ---
 
-[Automate Your Zsh Setup- Scripted Installation of Oh My Zsh, Auto-Suggestions & Syntax Highlighting](https://blogs.janakkumarshrestha0.com.np/posts/linux/zsh-setup-with-auto-suggestions--themes/)
-
----
-
 To keep your `.zsh_history` file synchronized between your local Linux machine and your cloud Linux server, you can use these approaches:
 
 ### 1. Use `rsync` for manual sync
@@ -41,8 +41,72 @@ rsync -avz ubuntu@202.51.74.32:/home/ubuntu/.zsh_history ~/
 ```
 This copies your history file both ways when needed.
 
-### 2. Automate using `cron` or shell alias
-Set up a cron job to periodically run the `rsync` command in either direction to keep the files updated regularly.
+### 2. Automate using `cron job`
+
+To create a cron job that automatically updates your `.zsh_history` in your local Git repo and pushes to GitHub, follow these steps:
+
+### 1. Create a script file (if not created yet)
+
+Save the update script (from previous answer) as `update_history_repo.sh` in your home folder, for example:
+
+```bash
+#!/bin/bash
+
+LOCAL_REPO_PATH="$HOME/Documents/zsh"
+LOCAL_HISTORY="$HOME/.zsh_history"
+
+cd "$LOCAL_REPO_PATH" || { echo "Local repo path not found."; exit 1; }
+
+cp "$LOCAL_HISTORY" "$LOCAL_REPO_PATH/.zsh_history"
+
+if git diff --quiet .zsh_history; then
+    echo "$(date): No changes in .zsh_history to commit." >> "$HOME/update_history.log"
+else
+    git add .zsh_history
+    git commit -m "Auto-update .zsh_history"
+    git push origin main
+    echo "$(date): .zsh_history updated and pushed to GitHub." >> "$HOME/update_history.log"
+fi
+```
+
+Make it executable:
+
+```sh
+chmod +x ~/update_history_repo.sh
+```
+
+***
+
+### 2. Add a cron job
+
+Edit your cron jobs by running:
+
+```sh
+crontab -e
+```
+
+Add this line to run the script daily at 12:00 PM: (adjust timing as desired):
+
+```cron
+0 12 * * * /bin/bash $HOME/update_history_repo.sh
+```
+
+***
+
+### 3. Save and exit the editor
+
+Cron will auto-load the job.  
+The script logs output to `update_history.log` inside your home directory for your reference.
+
+***
+
+### Notes:
+
+- Make sure your Git environment (keys, credentials) work non-interactively for pushing.
+- Adjust the cron frequency (`0 12 * * *`) as needed to run more or less often.
+
+This will automate pushing your updated `.zsh_history` from your local repo to GitHub regularly.
+
 
 ### 3. Use a cloud sync tool
 Services like Dropbox, Syncthing, or Nextcloud can sync specific files across machines continuously if installed.
