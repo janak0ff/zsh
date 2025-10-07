@@ -41,13 +41,15 @@ rsync -avz ubuntu@202.51.74.32:/home/ubuntu/.zsh_history ~/
 ```
 This copies your history file both ways when needed.
 
+---
+
 ### 2. Automate using `cron job`
 
 To create a cron job that automatically updates your `.zsh_history` in your local Git repo and pushes to GitHub, follow these steps:
 
-### 1. Create a script file (if not created yet)
+### a. Create a script file (if not created yet)
 
-Save the update script (from previous answer) as `update_history_repo.sh` in your home folder, for example:
+Save the script `update_history_repo.sh` 
 
 ```bash
 #!/bin/bash
@@ -77,7 +79,7 @@ chmod +x ~/update_history_repo.sh
 
 ***
 
-### 2. Add a cron job
+### b. Add a cron job
 
 Edit your cron jobs by running:
 
@@ -93,7 +95,7 @@ Add this line to run the script daily at 12:00 PM: (adjust timing as desired):
 
 ***
 
-### 3. Save and exit the editor
+### c. Save and exit the editor
 
 Cron will auto-load the job.  
 The script logs output to `update_history.log` inside your home directory for your reference.
@@ -107,6 +109,7 @@ The script logs output to `update_history.log` inside your home directory for yo
 
 This will automate pushing your updated `.zsh_history` from your local repo to GitHub regularly.
 
+---
 
 ### 3. Use a cloud sync tool
 Services like Dropbox, Syncthing, or Nextcloud can sync specific files across machines continuously if installed.
