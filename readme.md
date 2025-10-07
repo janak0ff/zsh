@@ -35,7 +35,7 @@ Run from your local machine to sync history file to server:
 ```sh
 rsync -avz ~/.zsh_history ubuntu@202.51.74.32:/home/ubuntu/
 ```
-And from the server to sync back to local:
+And from the server to sync to local:
 ```sh
 rsync -avz ubuntu@202.51.74.32:/home/ubuntu/.zsh_history ~/
 ```
