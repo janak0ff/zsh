@@ -30,11 +30,14 @@ sudo apt install -y zsh git curl
 
 info "Setting zsh as default shell..."
 if [[ "$SHELL" != *zsh ]]; then
-  chsh -s "$(which zsh)"
-  echo "✅ Zsh will be used next time you log in."
+  echo "⚠️ Skipping automatic shell change due to permission issues."
+  echo "Please run 'chsh -s $(which zsh)' manually if you want to change your default shell."
 else
   echo "✅ Zsh is already the default shell."
 fi
+
+info "Configuring auto-start of zsh on login (via .bashrc)..."
+grep -qxF 'exec zsh' ~/.bashrc || echo 'exec zsh' >> ~/.bashrc
 
 # === Plugin Setup ===
 ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
