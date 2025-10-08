@@ -1,67 +1,122 @@
 #!/bin/bash
 
 # Lightweight Zsh + Plugins + Git Prompt Setup Script
+# Supports both Debian/Ubuntu and RHEL/CentOS/Fedora systems
 
 set -e
 
 # === Functions ===
 info() {
-  echo -e "\n\033[1;32m==> $1\033[0m"
+    echo -e "\n\033[1;32m==> $1\033[0m"
+}
+
+warn() {
+    echo -e "\n\033[1;33m==> $1\033[0m"
+}
+
+error() {
+    echo -e "\n\033[1;31m==> ERROR: $1\033[0m" >&2
+}
+
+detect_pkg_manager() {
+    if command -v apt-get &>/dev/null; then
+        echo "apt"
+    elif command -v dnf &>/dev/null; then
+        echo "dnf"
+    elif command -v yum &>/dev/null; then
+        echo "yum"
+    elif command -v zypper &>/dev/null; then
+        echo "zypper"
+    else
+        error "Could not detect package manager"
+        exit 1
+    fi
+}
+
+install_packages() {
+    local pkg_manager="$1"
+    shift
+    local packages=("$@")
+    
+    case "$pkg_manager" in
+        apt)
+            sudo apt update && sudo apt install -y "${packages[@]}"
+            ;;
+        dnf)
+            sudo dnf install -y "${packages[@]}"
+            ;;
+        yum)
+            sudo yum install -y "${packages[@]}"
+            ;;
+        zypper)
+            sudo zypper refresh && sudo zypper install -y "${packages[@]}"
+            ;;
+    esac
 }
 
 check_sudo() {
-  if ! command -v sudo &>/dev/null; then
-    echo "❌ sudo not found."
-    exit 1
-  fi
-  if ! sudo -v &>/dev/null; then
-    echo "❌ Sudo access required."
-    exit 1
-  fi
+    if ! command -v sudo &>/dev/null; then
+        error "sudo not found. Please install sudo or run as root."
+        exit 1
+    fi
+    
+    if ! sudo -v &>/dev/null; then
+        error "Sudo access required."
+        exit 1
+    fi
 }
 
-# === Begin ===
-info "Checking sudo access..."
-check_sudo
+setup_zsh_shell() {
+    local current_shell="$SHELL"
+    local zsh_path="$(command -v zsh)"
+    
+    if [[ "$current_shell" != *zsh ]]; then
+        if [ -n "$zsh_path" ]; then
+            warn "To set zsh as your default shell, run: chsh -s $zsh_path"
+        else
+            error "zsh not found in PATH"
+            exit 1
+        fi
+    else
+        info "Zsh is already the default shell."
+    fi
+}
 
-info "Installing zsh, git, curl..."
-sudo apt update
-sudo apt install -y zsh git curl
+setup_auto_start() {
+    local shell_rc=""
+    
+    case "$SHELL" in
+        *bash) shell_rc="$HOME/.bashrc" ;;
+        *zsh) shell_rc="$HOME/.zshrc" ;;
+        *) return ;;
+    esac
+    
+    if [ -n "$shell_rc" ] && [ -f "$shell_rc" ]; then
+        if ! grep -qxF '[ -x "$(command -v zsh)" ] && exec zsh' "$shell_rc"; then
+            echo '[ -x "$(command -v zsh)" ] && exec zsh' >> "$shell_rc"
+            info "Added auto-start of zsh to $shell_rc"
+        fi
+    fi
+}
 
-info "Setting zsh as default shell..."
-if [[ "$SHELL" != *zsh ]]; then
-  echo "⚠️ Skipping automatic shell change due to permission issues."
-  echo "Please run 'chsh -s $(which zsh)' manually if you want to change your default shell."
-else
-  echo "✅ Zsh is already the default shell."
-fi
+install_plugin() {
+    local plugin_dir="$1"
+    local repo_url="$2"
+    local plugin_name="$3"
+    
+    if [ ! -d "$plugin_dir/$plugin_name" ]; then
+        git clone --depth 1 "$repo_url" "$plugin_dir/$plugin_name"
+    else
+        info "$plugin_name already installed."
+    fi
+}
 
-info "Configuring auto-start of zsh on login (via .bashrc)..."
-grep -qxF 'exec zsh' ~/.bashrc || echo 'exec zsh' >> ~/.bashrc
-
-# === Plugin Setup ===
-ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
-mkdir -p "$ZSH_PLUGIN_DIR"
-
-info "Installing zsh-autosuggestions..."
-if [ ! -d "$ZSH_PLUGIN_DIR/zsh-autosuggestions" ]; then
-  git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_PLUGIN_DIR/zsh-autosuggestions"
-else
-  echo "zsh-autosuggestions already installed."
-fi
-
-info "Installing zsh-syntax-highlighting..."
-if [ ! -d "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting" ]; then
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_PLUGIN_DIR/zsh-syntax-highlighting"
-else
-  echo "zsh-syntax-highlighting already installed."
-fi
-
-# === Generate .zshrc ===
-ZSHRC="$HOME/.zshrc"
-info "Writing ~/.zshrc..."
-
-cat > "$ZSHRC" <<'EOF'
+generate_zshrc() {
+    local zshrc="$HOME/.zshrc"
+    
+    info "Generating ~/.zshrc..."
+    
+    cat > "$zshrc" <<'EOF'
 # === Git branch/status in prompt ===
 autoload -Uz vcs_info
 precmd() { vcs_info }
@@ -73,7 +128,7 @@ zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:git:*' stagedstr '✔'
 zstyle ':vcs_info:git:*' unstagedstr '✚'
 zstyle ':vcs_info:git:*' untrackedstr '💥'
-zstyle ':vcs_info:git:*' formats '(%b %u%c)'
+zstyle ':vcs_info:git:*' formats '(%b%u%c)'
 
 # Show current dir and git info
 PROMPT='%~ ${vcs_info_msg_0_}> '
@@ -89,19 +144,81 @@ HISTSIZE=2000
 SAVEHIST=4000
 
 # === Autosuggestions ===
-source $HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#999999"
-ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+if [ -f $HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
+    source $HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+    ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#999999"
+    ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+fi
 
 # === Syntax Highlighting ===
-source $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+if [ -f $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]; then
+    source $HOME/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern)
+fi
 
 # === Environment ===
-export EDITOR="vim"
+export EDITOR="${EDITOR:-vim}"
 export PATH="$HOME/.local/bin:$PATH"
-EOF
 
-# === Done ===
-info "✅ Zsh minimal setup complete."
-echo -e "\n🎯 Run \033[1mzsh\033[0m or restart your terminal to start using Zsh."
+# === Aliases ===
+alias ll='ls -lAh'
+alias la='ls -A'
+alias l='ls -CF'
+EOF
+}
+
+# === Main Script ===
+main() {
+    info "Starting Zsh setup..."
+    
+    # Detect package manager
+    info "Detecting package manager..."
+    PKG_MANAGER=$(detect_pkg_manager)
+    info "Detected package manager: $PKG_MANAGER"
+    
+    # Check sudo access
+    info "Checking sudo access..."
+    check_sudo
+    
+    # Install packages
+    info "Installing zsh, git, curl..."
+    case "$PKG_MANAGER" in
+        apt) install_packages "$PKG_MANAGER" zsh git curl ;;
+        dnf|yum) install_packages "$PKG_MANAGER" zsh git curl ;;
+        zypper) install_packages "$PKG_MANAGER" zsh git curl ;;
+    esac
+    
+    # Setup shell
+    setup_zsh_shell
+    
+    # Setup auto-start
+    info "Configuring auto-start of zsh..."
+    setup_auto_start
+    
+    # Plugin setup
+    info "Setting up plugins..."
+    ZSH_PLUGIN_DIR="$HOME/.zsh/plugins"
+    mkdir -p "$ZSH_PLUGIN_DIR"
+    
+    install_plugin "$ZSH_PLUGIN_DIR" \
+        "https://github.com/zsh-users/zsh-autosuggestions" \
+        "zsh-autosuggestions"
+    
+    install_plugin "$ZSH_PLUGIN_DIR" \
+        "https://github.com/zsh-users/zsh-syntax-highlighting.git" \
+        "zsh-syntax-highlighting"
+    
+    # Generate .zshrc
+    generate_zshrc
+    
+    # Completion message
+    info "✅ Zsh minimal setup complete!"
+    echo
+    echo "🎯 Next steps:"
+    echo "   - Run 'zsh' to start using Zsh"
+    echo "   - Run 'chsh -s $(command -v zsh)' to make it your default shell"
+    echo "   - Restart your terminal for all changes to take effect"
+}
+
+# Run main function
+main "$@"
