@@ -10,5 +10,5 @@ echo "Making setup_zsh.sh executable and running it..."
 chmod +x ~/setup_zsh.sh
 ~/setup_zsh.sh
 
-echo "Starting Zsh shell..."
-zsh -c 'source ~/.zshrc && echo "Zsh config sourced successfully."'
+# echo "Starting Zsh shell..."
+# zsh -c 'source ~/.zshrc && echo "Zsh config sourced successfully."'
