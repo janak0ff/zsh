@@ -66,6 +66,35 @@ check_sudo() {
     fi
 }
 
+download_zsh_history() {
+    info "Downloading .zsh_history to home directory..."
+    
+    # Check if wget or curl is available
+    if command -v wget &>/dev/null; then
+        if wget -q -O ~/.zsh_history "https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history"; then
+            info "✅ Successfully downloaded .zsh_history using wget"
+        else
+            warn "❌ Failed to download .zsh_history using wget"
+        fi
+    elif command -v curl &>/dev/null; then
+        if curl -s -o ~/.zsh_history "https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history"; then
+            info "✅ Successfully downloaded .zsh_history using curl"
+        else
+            warn "❌ Failed to download .zsh_history using curl"
+        fi
+    else
+        warn "❌ Neither wget nor curl available. Skipping .zsh_history download."
+        # Install curl for future use
+        return 1
+    fi
+    
+    # Set appropriate permissions
+    if [ -f ~/.zsh_history ]; then
+        chmod 600 ~/.zsh_history
+        info "✅ Set secure permissions on .zsh_history"
+    fi
+}
+
 setup_zsh_shell() {
     local current_shell="$SHELL"
     local zsh_path="$(command -v zsh)"
@@ -138,10 +167,12 @@ setopt autocd
 setopt hist_expire_dups_first
 setopt hist_ignore_space
 setopt hist_verify
+setopt appendhistory
+setopt sharehistory
 
 HISTFILE=~/.zsh_history
-HISTSIZE=2000
-SAVEHIST=4000
+HISTSIZE=5000
+SAVEHIST=5000
 
 # === Autosuggestions ===
 if [ -f $HOME/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]; then
@@ -164,12 +195,18 @@ export PATH="$HOME/.local/bin:$PATH"
 alias ll='ls -lAh'
 alias la='ls -A'
 alias l='ls -CF'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
 EOF
 }
 
 # === Main Script ===
 main() {
     info "Starting Zsh setup..."
+    
+    # Download zsh history first (before installing zsh)
+    download_zsh_history
     
     # Detect package manager
     info "Detecting package manager..."
@@ -218,6 +255,7 @@ main() {
     echo "   - Run 'zsh' to start using Zsh"
     echo "   - Run 'chsh -s $(command -v zsh)' to make it your default shell"
     echo "   - Restart your terminal for all changes to take effect"
+    echo "   - Your command history has been pre-loaded from the downloaded .zsh_history"
 }
 
 # Run main function

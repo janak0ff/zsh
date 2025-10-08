@@ -2,12 +2,12 @@
 
 ---
 
-Here's a complete `install.sh` bash script that you can `curl` to any Linux server to perform the full install process:
+Here's a complete `setup_zsh.sh` bash script that you can `curl` to any Linux server to perform the full install process:
 
 Run this single curl command:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | bash
 ```
 ---
 
