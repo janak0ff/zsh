@@ -2,6 +2,15 @@
 
 ---
 
+Here's a complete `install.sh` bash script that you can `curl` to any Linux server to perform the full install process:
+
+Run this single curl command:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/install.sh | bash
+```
+---
+
 1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
     ```sh
     wget https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history
