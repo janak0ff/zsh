@@ -2,13 +2,19 @@
 
 ---
 
-Here's a complete `setup_zsh.sh` bash script that you can `curl` to any Linux server to perform the full install process:
+Here's a complete `setup_zsh.sh` bash script that you can `curl` to any (deb and rpm) based Linux server to perform the full install process:
 
-Run this single curl command:
+Run this single curl command in bash shell:
+
+```sh
+curl -sL setzsh.vercel.app | bash
+```
+- or
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | bash
 ```
+
 ---
 
 1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
