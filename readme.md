@@ -9,14 +9,14 @@ Run this single curl command in bash shell:
 ```sh
 curl -sL setzsh.vercel.app | bash
 ```
-- or
+- OR 
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | bash
 ```
 
 ---
-
+<!-- 
 1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
     ```sh
     wget https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh https://raw.githubusercontent.com/janak0ff/zsh/main/.zsh_history
@@ -39,7 +39,7 @@ curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | ba
    ```sh
    source ~/.zshrc
    ```
-   This avoids Bash-only errors and applies Zsh-specific changes right away.
+   This avoids Bash-only errors and applies Zsh-specific changes right away. -->
 
 ---
 
