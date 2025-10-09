@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
+    },
+    {
+      "source": "/zsh",
+      "destination": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
+    }
+  ]
+}
