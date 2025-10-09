@@ -1,13 +1,15 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/",
-      "destination": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
-    },
+      "src": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
     {
-      "source": "/zsh",
-      "destination": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
+      "src": "/(.*)",
+      "dest": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
     }
   ]
 }
