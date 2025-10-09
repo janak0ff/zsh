@@ -1,15 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh",
-      "use": "@vercel/static"
-    }
-  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh"
+      "dest": "/api/setup.js"
     }
   ]
 }
