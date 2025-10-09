@@ -2,8 +2,8 @@
   "version": 2,
   "routes": [
     {
-      "src": "/(.*)", 
-      "dest": "https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh",
+      "src": "/(.*)",
+      "dest": "/setup_zsh.sh",
       "headers": {
         "Content-Type": "text/plain"
       }
