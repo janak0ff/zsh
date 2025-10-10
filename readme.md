@@ -4,12 +4,14 @@
 
 Here's a complete `setup_zsh.sh` bash script that you can `curl` to any Linux server to perform the full install process:
 
-Run this single curl command:
+*single installation command*
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | bash
 ```
 ---
+
+*Manual installation*
 
 1. Download my `setup_zsh.sh and .zsh_history` files in home dir:
     ```sh
@@ -36,6 +38,8 @@ curl -fsSL https://raw.githubusercontent.com/janak0ff/zsh/main/setup_zsh.sh | ba
    This avoids Bash-only errors and applies Zsh-specific changes right away.
 
 ---
+
+*Additional config*
 
 To keep your `.zsh_history` file synchronized between your local Linux machine and your cloud Linux server, you can use these approaches:
 
