@@ -7,7 +7,7 @@ Here's a complete `setup_zsh.sh` bash script that you can `curl` to any (deb and
 Run this single curl command in bash shell:
 
 ```sh
-curl -sL setzsh.vercel.app | bash
+curl -sL installzsh.vercel.app | bash
 ```
 - OR 
 
